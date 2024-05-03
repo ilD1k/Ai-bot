@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 import logging
 from db import *
-from buttons import create_key
 from Speechkit import speech_to_text, text_to_speech, is_stt_block_limit, stt_symbols_db_to_text, tokens_control, \
     stt_symbols_db
 from Tokenizer import *
@@ -28,9 +27,9 @@ def start_handler(message):
     db_user = CreateDatabase()
     if not db_user.check_user_exists(message.chat.id):
         db_user.add_user(message.chat.id)
-        bot.send_message(message.chat.id, "Привет, Я Бот голосовой помощник", reply_markup=create_key())
+        bot.send_message(message.chat.id, "Привет, Я Бот голосовой помощник")
     else:
-        bot.send_message(message.chat.id, "Привет, Я Бот голосовой помощник", reply_markup=create_key())
+        bot.send_message(message.chat.id, "Привет, Я Бот голосовой помощник")
 
 
 # commadns, ya sam chet xz tak li ix nado delat
@@ -135,7 +134,7 @@ def voice_message_handler_message(message):
         duration_user = message.voice.duration
         result_info = is_stt_block_limit(user_id=user_id, duration=duration_user)
         if result_info == 'Превышено длительность голосового сообщения' or result_info == 'Превышен лимит для пользователя':
-            bot.send_message(message.chat.id, result_info, reply_markup=create_key())
+            bot.send_message(message.chat.id, result_info)
             return
         voice_speechkit = speech_to_text(file)
         if voice_speechkit != 'При запросе возникла ошибка':
@@ -149,17 +148,16 @@ def voice_message_handler_message(message):
                 if result_text != 'При запросе возникла ошибка':
                     stt_symbols_db_to_text(user_id, voice_speechkit)
                     stt_symbols_db_to_text(user_id, gpt_response)
-                    bot.send_voice(message.chat.id, result_text, reply_markup=create_key())
+                    bot.send_voice(message.chat.id, result_text)
                 else:
-                    bot.send_message(message.chat.id, "При запросе возникла ошибка", reply_markup=create_key())
+                    bot.send_message(message.chat.id, "При запросе возникла ошибка")
             else:
-                bot.send_message(message.chat.id, "При запросе в нейросеть произошла ошибка",
-                                 reply_markup=create_key())
+                bot.send_message(message.chat.id, "При запросе в нейросеть произошла ошибка")
         else:
-            bot.send_message(message.chat.id, "При запросе произошла ошибка", reply_markup=create_key())
+            bot.send_message(message.chat.id, "При запросе произошла ошибка")
 
     else:
-        bot.send_message(message.chat.id, "Запросы закончились!", reply_markup=create_key())
+        bot.send_message(message.chat.id, "Запросы закончились!")
 
 
 @bot.message_handler(content_types=["text"])
@@ -174,7 +172,7 @@ def text_message_handler_message(message):
     if int(result_tokens) > 0:
         gpt_response = promt_gpt(text)
         if gpt_response != 'Ошибка':
-            bot.send_message(message.chat.id, gpt_response, reply_markup=create_key())
+            bot.send_message(message.chat.id, gpt_response)
             stt_symbols_db_to_text(user_id, text)
             stt_symbols_db_to_text(user_id, gpt_response)
             tokenizer = count_tokens(text + gpt_response)
@@ -183,9 +181,9 @@ def text_message_handler_message(message):
             save_tokens.close()
         else:
             bot.send_message(message.chat.id, 'Произошла ошибка в \n'
-                                              'нейросети!', reply_markup=create_key())
+                                              'нейросети!')
     else:
-        bot.send_message(message.chat.id, 'Запросы закончились!', reply_markup=create_key())
+        bot.send_message(message.chat.id, 'Запросы закончились!')
 
 
 bot.polling()
